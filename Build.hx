@@ -18,5 +18,10 @@ class Build {
         sys.FileSystem.rename(tmp, file);
       }
     }
+    Sys.command('chmod', ['+x', '${cwd}bin/haxelibshim.js']);
+    Sys.command('chmod', ['+x', '${cwd}bin/haxeshim.js']);
+    Sys.command('chmod', ['+x', '${cwd}bin/lix.js']);
+    Sys.command('chmod', ['+x', '${cwd}bin/nekoshim.js']);
+    Sys.command('chmod', ['+x', '${cwd}bin/postinstall.js']);
   }
 }
