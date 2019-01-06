@@ -20162,7 +20162,301 @@ mkdirP.sync = function sync (p, opts, made) {
 };
 
 },
-"bqHxAxlm2B8uV+DljzxOzmCTO1w6BYx1Ni9/QrdEepY=":
+"cNkGJh84Pf7HRvooiXjtuVllNMQOY39llomxXEm6JyE=":
+function (require, module, exports, __dirname, __filename) {
+'use strict';
+
+exports.__esModule = true;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/*!
+ * Amazon Cognito Auth SDK for JavaScript
+ * Copyright 2017 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * A copy of the License is located at
+ *
+ *         http://aws.amazon.com/apache2.0/
+ *
+ * or in the "license" file accompanying this file.
+ * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+ * OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions
+ * and limitations under the License.
+ */
+var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+var weekNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+/** @class */
+
+var DateHelper = function () {
+  function DateHelper() {
+    _classCallCheck(this, DateHelper);
+  }
+
+  /**
+   * @returns {string} The current time in "ddd MMM D HH:mm:ss UTC YYYY" format.
+   */
+  DateHelper.prototype.getNowString = function getNowString() {
+    var now = new Date();
+
+    var weekDay = weekNames[now.getUTCDay()];
+    var month = monthNames[now.getUTCMonth()];
+    var day = now.getUTCDate();
+
+    var hours = now.getUTCHours();
+    if (hours < 10) {
+      hours = '0' + hours;
+    }
+
+    var minutes = now.getUTCMinutes();
+    if (minutes < 10) {
+      minutes = '0' + minutes;
+    }
+
+    var seconds = now.getUTCSeconds();
+    if (seconds < 10) {
+      seconds = '0' + seconds;
+    }
+
+    var year = now.getUTCFullYear();
+
+    // ddd MMM D HH:mm:ss UTC YYYY
+    var dateNow = weekDay + ' ' + month + ' ' + day + ' ' + hours + ':' + minutes + ':' + seconds + ' UTC ' + year;
+
+    return dateNow;
+  };
+
+  return DateHelper;
+}();
+
+exports.default = DateHelper;
+},
+"cvqfYP9IEpFD3i4cH2JM7w1/Qa1Vx9YNlNEBRjUplgc=":
+function (require, module, exports, __dirname, __filename) {
+'use strict';
+
+/*<replacement>*/
+
+var pna = require('process-nextick-args');
+/*</replacement>*/
+
+// undocumented cb() API, needed for core, not for public API
+function destroy(err, cb) {
+  var _this = this;
+
+  var readableDestroyed = this._readableState && this._readableState.destroyed;
+  var writableDestroyed = this._writableState && this._writableState.destroyed;
+
+  if (readableDestroyed || writableDestroyed) {
+    if (cb) {
+      cb(err);
+    } else if (err && (!this._writableState || !this._writableState.errorEmitted)) {
+      pna.nextTick(emitErrorNT, this, err);
+    }
+    return this;
+  }
+
+  // we set destroyed to true before firing error callbacks in order
+  // to make it re-entrance safe in case destroy() is called within callbacks
+
+  if (this._readableState) {
+    this._readableState.destroyed = true;
+  }
+
+  // if this is a duplex stream mark the writable part as destroyed as well
+  if (this._writableState) {
+    this._writableState.destroyed = true;
+  }
+
+  this._destroy(err || null, function (err) {
+    if (!cb && err) {
+      pna.nextTick(emitErrorNT, _this, err);
+      if (_this._writableState) {
+        _this._writableState.errorEmitted = true;
+      }
+    } else if (cb) {
+      cb(err);
+    }
+  });
+
+  return this;
+}
+
+function undestroy() {
+  if (this._readableState) {
+    this._readableState.destroyed = false;
+    this._readableState.reading = false;
+    this._readableState.ended = false;
+    this._readableState.endEmitted = false;
+  }
+
+  if (this._writableState) {
+    this._writableState.destroyed = false;
+    this._writableState.ended = false;
+    this._writableState.ending = false;
+    this._writableState.finished = false;
+    this._writableState.errorEmitted = false;
+  }
+}
+
+function emitErrorNT(self, err) {
+  self.emit('error', err);
+}
+
+module.exports = {
+  destroy: destroy,
+  undestroy: undestroy
+};
+},
+"dNeqGTE1JA/3tgRnnlYKLiNutQ/9L4hXxhdAxQfx1Zg=":
+function (require, module, exports, __dirname, __filename) {
+/**
+ * node-crc32-stream
+ *
+ * Copyright (c) 2014 Chris Talkington, contributors.
+ * Licensed under the MIT license.
+ * https://github.com/archiverjs/node-crc32-stream/blob/master/LICENSE-MIT
+ */
+var inherits = require('util').inherits;
+var Transform = require('readable-stream').Transform;
+
+var crc32 = require('crc').crc32;
+
+var CRC32Stream = module.exports = function CRC32Stream(options) {
+  Transform.call(this, options);
+  this.checksum = new Buffer(4);
+  this.checksum.writeInt32BE(0, 0);
+
+  this.rawSize = 0;
+};
+
+inherits(CRC32Stream, Transform);
+
+CRC32Stream.prototype._transform = function(chunk, encoding, callback) {
+  if (chunk) {
+    this.checksum = crc32(chunk, this.checksum);
+    this.rawSize += chunk.length;
+  }
+
+  callback(null, chunk);
+};
+
+CRC32Stream.prototype.digest = function(encoding) {
+  var checksum = new Buffer(4);
+  checksum.writeUInt32BE(this.checksum >>> 0, 0);
+  return encoding ? checksum.toString(encoding) : checksum;
+};
+
+CRC32Stream.prototype.hex = function() {
+  return this.digest('hex').toUpperCase();
+};
+
+CRC32Stream.prototype.size = function() {
+  return this.rawSize;
+};
+
+},
+"e36wfZMPaqwyun9WE5cVLJe4GzUQ1d7tAd5xIyep4Xo=":
+function (require, module, exports, __dirname, __filename) {
+'use strict';
+
+if (!process.version ||
+    process.version.indexOf('v0.') === 0 ||
+    process.version.indexOf('v1.') === 0 && process.version.indexOf('v1.8.') !== 0) {
+  module.exports = { nextTick: nextTick };
+} else {
+  module.exports = process
+}
+
+function nextTick(fn, arg1, arg2, arg3) {
+  if (typeof fn !== 'function') {
+    throw new TypeError('"callback" argument must be a function');
+  }
+  var len = arguments.length;
+  var args, i;
+  switch (len) {
+  case 0:
+  case 1:
+    return process.nextTick(fn);
+  case 2:
+    return process.nextTick(function afterTickOne() {
+      fn.call(null, arg1);
+    });
+  case 3:
+    return process.nextTick(function afterTickTwo() {
+      fn.call(null, arg1, arg2);
+    });
+  case 4:
+    return process.nextTick(function afterTickThree() {
+      fn.call(null, arg1, arg2, arg3);
+    });
+  default:
+    args = new Array(len - 1);
+    i = 0;
+    while (i < args.length) {
+      args[i++] = arguments[i];
+    }
+    return process.nextTick(function afterTick() {
+      fn.apply(null, args);
+    });
+  }
+}
+
+
+},
+"evml92wA9yvtRLg4JKis1n/rz9PTT9KTwgw1qn5mV/Y=":
+function (require, module, exports, __dirname, __filename) {
+try {
+  var util = require('util');
+  if (typeof util.inherits !== 'function') throw '';
+  module.exports = util.inherits;
+} catch (e) {
+  module.exports = require('./inherits_browser.js');
+}
+
+},
+"fcYRrxhcnv70k8xFFaisyZ/4TgeN/YfBjZw+NqpOkxI=":
+function (require, module, exports, __dirname, __filename) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _buffer = require('buffer');
+
+var _create_buffer = require('./create_buffer');
+
+var _create_buffer2 = _interopRequireDefault(_create_buffer);
+
+var _define_crc = require('./define_crc');
+
+var _define_crc2 = _interopRequireDefault(_define_crc);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var crc1 = (0, _define_crc2.default)('crc1', function (buf, previous) {
+  if (!_buffer.Buffer.isBuffer(buf)) buf = (0, _create_buffer2.default)(buf);
+
+  var crc = ~~previous;
+  var accum = 0;
+
+  for (var index = 0; index < buf.length; index++) {
+    var byte = buf[index];
+    accum += byte;
+  }
+
+  crc += accum % 256;
+  return crc % 256;
+});
+
+exports.default = crc1;
+
+},
+"fqUiydJrKjW6UCLn7/dhNGo/7tM6Z2hatJSJl6eWau0=":
 function (require, module, exports, __dirname, __filename) {
 
 
@@ -22710,19 +23004,20 @@ haxeshim_Os.slashes = function(path) {
 		return path;
 	}
 };
-var haxeshim_HaxeInstallation = function(path,version,haxelibRepo) {
+var haxeshim_HaxeInstallation = function(path,version,haxelibRepo,scope) {
 	this.path = path;
 	this.version = version;
 	this.compiler = "" + path + "/haxe" + haxeshim_HaxeInstallation.EXT;
 	this.haxelib = "" + path + "/haxelib" + haxeshim_HaxeInstallation.EXT;
 	this.stdLib = "" + path + "/std";
 	this.haxelibRepo = haxelibRepo;
+	this.scope = scope;
 };
 $hxClasses["haxeshim.HaxeInstallation"] = haxeshim_HaxeInstallation;
 haxeshim_HaxeInstallation.__name__ = ["haxeshim","HaxeInstallation"];
 haxeshim_HaxeInstallation.prototype = {
 	env: function() {
-		var ret = haxeshim__$Env_Env_$Impl_$.ofVars({ HAXE_STD_PATH : this.stdLib, HAXEPATH : this.path, HAXELIB_PATH : this.haxelibRepo, HAXE_VERSION : this.version});
+		var ret = haxeshim__$Env_Env_$Impl_$.ofVars({ HAXE_STD_PATH : this.stdLib, HAXEPATH : this.path, HAXELIB_PATH : this.haxelibRepo, HAXE_VERSION : this.version, SCOPE_PATH : this.scope});
 		return haxeshim__$Env_Env_$Impl_$.mergeInto(ret,haxeshim_Neko.ENV);
 	}
 	,__class__: haxeshim_HaxeInstallation
@@ -22951,9 +23246,9 @@ haxeshim_Scope.prototype = {
 		switch(_g[1]) {
 		case 0:
 			var path = _g[2];
-			return new haxeshim_HaxeInstallation(path,version,this.haxelibRepo);
+			return new haxeshim_HaxeInstallation(path,version,this.haxelibRepo,this.scopeDir);
 		case 1:
-			return new haxeshim_HaxeInstallation("" + this.versionDir + "/" + version,version,this.haxelibRepo);
+			return new haxeshim_HaxeInstallation("" + this.versionDir + "/" + version,version,this.haxelibRepo,this.scopeDir);
 		}
 	}
 	,interpolate: function(value) {
@@ -24022,6 +24317,7 @@ lix_cli_Cli.dispatch = function(args) {
 	var version = "15.4.0-rc.3";
 	var silent = HxOverrides.remove(args,"--silent");
 	var force = HxOverrides.remove(args,"--force");
+	var submodules = HxOverrides.remove(args,"--submodules");
 	var global1 = HxOverrides.remove(args,"--global") || HxOverrides.remove(args,"-g");
 	var scope = haxeshim_Scope.seek({ cwd : global1 ? haxeshim_Scope.DEFAULT_ROOT : null});
 	var args1 = lix_cli__$Command_CommandExpander_$Impl_$.ofString("+tink install github:haxetink/tink_${0}");
@@ -24056,7 +24352,7 @@ lix_cli_Cli.dispatch = function(args) {
 	}
 	var github1 = new lix_client_sources_GitHub(github);
 	var haxelibUrl = tink_url__$Host_Host_$Impl_$._new(grab("--haxelib-url"));
-	var sources = [lix_client_sources_Web,new lix_client_sources_Lix(),new lix_client_sources_Haxelib(haxelibUrl),github1,gitlab,new lix_client_sources_Git(github1,gitlab,scope)];
+	var sources = [lix_client_sources_Web,new lix_client_sources_Lix(),new lix_client_sources_Haxelib(haxelibUrl),github1,gitlab,new lix_client_sources_Git(github1,gitlab,scope,submodules)];
 	var _g11 = new haxe_ds_StringMap();
 	var _g2 = 0;
 	while(_g2 < sources.length) {
@@ -24079,7 +24375,7 @@ lix_cli_Cli.dispatch = function(args) {
 		var key = url.scheme;
 		var _g21 = __map_reserved[key] != null ? resolvers.getReserved(key) : resolvers.h[key];
 		if(_g21 == null) {
-			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"Unknown scheme in url " + tink__$Url_Url_$Impl_$.toString(url),{ fileName : "Cli.hx", lineNumber : 49, className : "lix.cli.Cli", methodName : "dispatch"})));
+			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"Unknown scheme in url " + tink__$Url_Url_$Impl_$.toString(url),{ fileName : "Cli.hx", lineNumber : 50, className : "lix.cli.Cli", methodName : "dispatch"})));
 		} else {
 			var v2 = _g21;
 			return v2.processUrl(url);
@@ -24089,7 +24385,7 @@ lix_cli_Cli.dispatch = function(args) {
 	} : Sys.println;
 	var hx = new lix_client_haxe_Switcher(scope,silent,log);
 	var libs = new lix_client_Libraries(scope,resolve,function(_1) {
-		return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(501,"not implemented",{ fileName : "Cli.hx", lineNumber : 60, className : "lix.cli.Cli", methodName : "dispatch"})));
+		return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(501,"not implemented",{ fileName : "Cli.hx", lineNumber : 61, className : "lix.cli.Cli", methodName : "dispatch"})));
 	},log,force,silent);
 	var auth = new lix_Auth();
 	var client = new tink_http_clients_SecureNodeClient();
@@ -24102,11 +24398,11 @@ lix_cli_Cli.dispatch = function(args) {
 	var this3 = "lix - Libraries for haXe (v" + version + ")";
 	var this4 = new lix_cli_Command(lix_cli__$Command_CommandName_$Impl_$.ofString("install"),"<url> [as <lib[#ver]>]","install lib from specified url",function(args3) {
 		if(scope.isGlobal && !global1) {
-			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"Current scope is global. Please use --global if you intend to install globally, or create a local scope with `lix scope create`.",{ fileName : "Cli.hx", lineNumber : 80, className : "lix.cli.Cli", methodName : "dispatch"})));
+			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"Current scope is global. Please use --global if you intend to install globally, or create a local scope with `lix scope create`.",{ fileName : "Cli.hx", lineNumber : 81, className : "lix.cli.Cli", methodName : "dispatch"})));
 		} else {
 			switch(args3.length) {
 			case 0:
-				return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"Missing url",{ fileName : "Cli.hx", lineNumber : 93, className : "lix.cli.Cli", methodName : "dispatch"})));
+				return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"Missing url",{ fileName : "Cli.hx", lineNumber : 94, className : "lix.cli.Cli", methodName : "dispatch"})));
 			case 1:
 				var library = args3[0];
 				if(tink__$Url_Url_$Impl_$.fromString(library).scheme == null) {
@@ -24140,12 +24436,12 @@ lix_cli_Cli.dispatch = function(args) {
 					return libs.installUrl(this6,this7);
 				} else {
 					var v3 = args3;
-					return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"too many arguments",{ fileName : "Cli.hx", lineNumber : 94, className : "lix.cli.Cli", methodName : "dispatch"})));
+					return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"too many arguments",{ fileName : "Cli.hx", lineNumber : 95, className : "lix.cli.Cli", methodName : "dispatch"})));
 				}
 				break;
 			default:
 				var v4 = args3;
-				return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"too many arguments",{ fileName : "Cli.hx", lineNumber : 94, className : "lix.cli.Cli", methodName : "dispatch"})));
+				return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"too many arguments",{ fileName : "Cli.hx", lineNumber : 95, className : "lix.cli.Cli", methodName : "dispatch"})));
 			}
 		}
 	});
@@ -24156,10 +24452,10 @@ lix_cli_Cli.dispatch = function(args) {
 				var version2 = args4[1];
 				return tink_core__$Promise_Promise_$Impl_$.next(hx.resolveInstalled(lix_client_haxe__$UserVersion_UserVersion_$Impl_$.ofString(version2)),$bind(hx,hx.switchTo));
 			} else {
-				return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"invalid arguments",{ fileName : "Cli.hx", lineNumber : 100, className : "lix.cli.Cli", methodName : "dispatch"})));
+				return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"invalid arguments",{ fileName : "Cli.hx", lineNumber : 101, className : "lix.cli.Cli", methodName : "dispatch"})));
 			}
 		} else {
-			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"invalid arguments",{ fileName : "Cli.hx", lineNumber : 100, className : "lix.cli.Cli", methodName : "dispatch"})));
+			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"invalid arguments",{ fileName : "Cli.hx", lineNumber : 101, className : "lix.cli.Cli", methodName : "dispatch"})));
 		}
 	});
 	var this10 = new lix_cli_Command(lix_cli__$Command_CommandName_$Impl_$.ofString("download haxe"),"<version>|<alias>","download specified haxe version",null);
@@ -24177,7 +24473,7 @@ lix_cli_Cli.dispatch = function(args) {
 				return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Success(tink_core_Noise.Noise));
 			case "delete":
 				if(scope.isGlobal) {
-					return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"Cannot delete global scope",{ fileName : "Cli.hx", lineNumber : 114, className : "lix.cli.Cli", methodName : "dispatch"})));
+					return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"Cannot delete global scope",{ fileName : "Cli.hx", lineNumber : 115, className : "lix.cli.Cli", methodName : "dispatch"})));
 				} else {
 					scope["delete"]();
 					log("deleted scope in " + scope.scopeDir);
@@ -24186,12 +24482,12 @@ lix_cli_Cli.dispatch = function(args) {
 				break;
 			default:
 				var v5 = args5;
-				return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"Invalid arguments",{ fileName : "Cli.hx", lineNumber : 126, className : "lix.cli.Cli", methodName : "dispatch"})));
+				return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"Invalid arguments",{ fileName : "Cli.hx", lineNumber : 127, className : "lix.cli.Cli", methodName : "dispatch"})));
 			}
 			break;
 		default:
 			var v6 = args5;
-			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"Invalid arguments",{ fileName : "Cli.hx", lineNumber : 126, className : "lix.cli.Cli", methodName : "dispatch"})));
+			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"Invalid arguments",{ fileName : "Cli.hx", lineNumber : 127, className : "lix.cli.Cli", methodName : "dispatch"})));
 		}
 	});
 	var this12 = new lix_cli_Command(lix_cli__$Command_CommandName_$Impl_$.ofString("haxe-versions"),"","lists currently downloaded versions",function(args6) {
@@ -24239,7 +24535,7 @@ lix_cli_Cli.dispatch = function(args) {
 				});
 			});
 		} else {
-			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"command `list` does expect arguments",{ fileName : "Cli.hx", lineNumber : 163, className : "lix.cli.Cli", methodName : "dispatch"})));
+			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"command `list` does expect arguments",{ fileName : "Cli.hx", lineNumber : 164, className : "lix.cli.Cli", methodName : "dispatch"})));
 		}
 	});
 	var this13 = new lix_cli_Command(lix_cli__$Command_CommandName_$Impl_$.ofString("download"),"[<url[#lib[#ver]]>]","download lib from url if specified,\notherwise download missing libs",function(args7) {
@@ -24266,7 +24562,7 @@ lix_cli_Cli.dispatch = function(args) {
 				return tink_core__$Promise_Promise_$Impl_$.noise(hx.resolveAndDownload(version4,{ force : force}));
 			} else {
 				var v13 = args7;
-				return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"too many arguments",{ fileName : "Cli.hx", lineNumber : 208, className : "lix.cli.Cli", methodName : "dispatch"})));
+				return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"too many arguments",{ fileName : "Cli.hx", lineNumber : 209, className : "lix.cli.Cli", methodName : "dispatch"})));
 			}
 			break;
 		case 3:
@@ -24284,7 +24580,7 @@ lix_cli_Cli.dispatch = function(args) {
 					}
 				};
 				if(sys_FileSystem.exists(absTarget)) {
-					return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"`download <url> as <ver>` is no longer supported",{ fileName : "Cli.hx", lineNumber : 179, className : "lix.cli.Cli", methodName : "dispatch"})));
+					return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"`download <url> as <ver>` is no longer supported",{ fileName : "Cli.hx", lineNumber : 180, className : "lix.cli.Cli", methodName : "dispatch"})));
 				} else {
 					var v14 = "[WARN]: Processing obsolete `download " + args7.map(shorten).join(" ") + "`.\n        Please reinstall library in a timely manner!\n\n";
 					process.stdout.write(Std.string(v14));
@@ -24302,17 +24598,17 @@ lix_cli_Cli.dispatch = function(args) {
 				return tink_core__$Promise_Promise_$Impl_$.noise(libs.downloadUrl(tink__$Url_Url_$Impl_$.fromString(url5),{ into : dir}));
 			default:
 				var v15 = args7;
-				return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"too many arguments",{ fileName : "Cli.hx", lineNumber : 208, className : "lix.cli.Cli", methodName : "dispatch"})));
+				return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"too many arguments",{ fileName : "Cli.hx", lineNumber : 209, className : "lix.cli.Cli", methodName : "dispatch"})));
 			}
 			break;
 		default:
 			var v16 = args7;
-			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"too many arguments",{ fileName : "Cli.hx", lineNumber : 208, className : "lix.cli.Cli", methodName : "dispatch"})));
+			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"too many arguments",{ fileName : "Cli.hx", lineNumber : 209, className : "lix.cli.Cli", methodName : "dispatch"})));
 		}
 	});
 	var this15 = new lix_cli_Command(lix_cli__$Command_CommandName_$Impl_$.ofString("run"),"lib ...args","run a library",function(args8) {
 		if(args8.length == 0) {
-			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"no library specified",{ fileName : "Cli.hx", lineNumber : 212, className : "lix.cli.Cli", methodName : "dispatch"})));
+			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"no library specified",{ fileName : "Cli.hx", lineNumber : 213, className : "lix.cli.Cli", methodName : "dispatch"})));
 		} else {
 			var args9 = args8;
 			return tink_core__$Promise_Promise_$Impl_$.noise(tink_core__$Promise_Promise_$Impl_$.next(scope.getLibCommand(args9),function(cmd) {
@@ -24322,7 +24618,7 @@ lix_cli_Cli.dispatch = function(args) {
 	});
 	var this16 = new lix_cli_Command(["--version","-v"],"","print version",function(args10) {
 		if(args10.length > 0) {
-			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"too many arguments",{ fileName : "Cli.hx", lineNumber : 218, className : "lix.cli.Cli", methodName : "dispatch"})));
+			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"too many arguments",{ fileName : "Cli.hx", lineNumber : 219, className : "lix.cli.Cli", methodName : "dispatch"})));
 		} else {
 			process.stdout.write(version == null ? "null" : "" + version);
 			process.stdout.write("\n");
@@ -24331,7 +24627,7 @@ lix_cli_Cli.dispatch = function(args) {
 	});
 	var this17 = new lix_cli_Command(lix_cli__$Command_CommandName_$Impl_$.ofString("run-haxelib"),"path ...args","invoke a haxelib at a given path following haxelib's conventions",function(args11) {
 		if(args11.length == 0) {
-			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"no path supplied",{ fileName : "Cli.hx", lineNumber : 226, className : "lix.cli.Cli", methodName : "dispatch"})));
+			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"no path supplied",{ fileName : "Cli.hx", lineNumber : 227, className : "lix.cli.Cli", methodName : "dispatch"})));
 		} else {
 			new haxeshim_HaxelibCli(scope).run(args11.slice(1));
 			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Success(tink_core_Noise.Noise));
@@ -24375,7 +24671,7 @@ lix_cli_Cli.dispatch = function(args) {
 	});
 	var this20 = new lix_cli_Command(lix_cli__$Command_CommandName_$Impl_$.ofString("submit"),"[directory]","Submit package to the Lix Registry",function(args14) {
 		if(args14.length > 1) {
-			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"command `submit` expectes 0 or 1 arguments",{ fileName : "Cli.hx", lineNumber : 263, className : "lix.cli.Cli", methodName : "dispatch"})));
+			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"command `submit` expectes 0 or 1 arguments",{ fileName : "Cli.hx", lineNumber : 264, className : "lix.cli.Cli", methodName : "dispatch"})));
 		}
 		var f2 = function(path,root) {
 			return new archive_scanner_AsysScanner(path,root);
@@ -24392,10 +24688,10 @@ lix_cli_Cli.dispatch = function(args) {
 				var name1 = args15[1];
 				return tink_core__$Promise_Promise_$Impl_$.noise(remote.owners().create(name1));
 			} else {
-				return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"Invalid arguments",{ fileName : "Cli.hx", lineNumber : 272, className : "lix.cli.Cli", methodName : "dispatch"})));
+				return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"Invalid arguments",{ fileName : "Cli.hx", lineNumber : 273, className : "lix.cli.Cli", methodName : "dispatch"})));
 			}
 		} else {
-			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"Invalid arguments",{ fileName : "Cli.hx", lineNumber : 272, className : "lix.cli.Cli", methodName : "dispatch"})));
+			return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"Invalid arguments",{ fileName : "Cli.hx", lineNumber : 273, className : "lix.cli.Cli", methodName : "dispatch"})));
 		}
 	})],[]).handle(lix_cli_Command.reportOutcome);
 };
@@ -25487,7 +25783,9 @@ lix_client_Libraries.prototype = {
 			};
 			var saveHxml = function(value) {
 				return new tink_core__$Future_SyncFuture(new tink_core__$Lazy_LazyConst(tink_core_TypedError.catchExceptions(function() {
-					var directives = ["-D " + name + "=" + version,"# @" + "install" + ": lix --silent download \"" + tink__$Url_Url_$Impl_$.toString(a1.job.normalized) + "\" into " + a1.relRoot];
+					var $arguments = a1.job["arguments"] == null ? [] : a1.job["arguments"].slice();
+					$arguments.push("--silent");
+					var directives = ["-D " + name + "=" + version,"# @" + "install" + ": lix " + $arguments.join(" ") + " download \"" + tink__$Url_Url_$Impl_$.toString(a1.job.normalized) + "\" into " + a1.relRoot];
 					var _g1 = infos.postDownload;
 					if(_g1 != null) {
 						var v2 = _g1;
@@ -25550,7 +25848,7 @@ lix_client_Libraries.prototype = {
 					var errors = _g11;
 					return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(tink_core_TypedError.withData(null,"Failed to install dependencies:\n  " + errors.map(function(e1) {
 						return e1.message;
-					}).join("\n  "),errors,{ fileName : "Libraries.hx", lineNumber : 187, className : "lix.client.Libraries", methodName : "installArchive"})));
+					}).join("\n  "),errors,{ fileName : "Libraries.hx", lineNumber : 190, className : "lix.client.Libraries", methodName : "installArchive"})));
 				}
 			}),function(_1) {
 				if(!a1.alreadyDownloaded) {
@@ -26182,10 +26480,11 @@ lix_client_haxe_UserVersionData.UStable.__enum__ = lix_client_haxe_UserVersionDa
 lix_client_haxe_UserVersionData.UNightly = function(hash) { var $x = ["UNightly",3,hash]; $x.__enum__ = lix_client_haxe_UserVersionData; $x.toString = $estr; return $x; };
 lix_client_haxe_UserVersionData.UOfficial = function(version) { var $x = ["UOfficial",4,version]; $x.__enum__ = lix_client_haxe_UserVersionData; $x.toString = $estr; return $x; };
 lix_client_haxe_UserVersionData.UCustom = function(path) { var $x = ["UCustom",5,path]; $x.__enum__ = lix_client_haxe_UserVersionData; $x.toString = $estr; return $x; };
-var lix_client_sources_Git = function(github,gitlab,scope) {
+var lix_client_sources_Git = function(github,gitlab,scope,submodules) {
 	this.github = github;
 	this.gitlab = gitlab;
 	this.scope = scope;
+	this.submodules = submodules;
 };
 $hxClasses["lix.client.sources.Git"] = lix_client_sources_Git;
 lix_client_sources_Git.__name__ = ["lix","client","sources","Git"];
@@ -26196,7 +26495,7 @@ lix_client_sources_Git["eval"] = function(cmd,cwd,args,env) {
 		return tink_core_Outcome.Success({ status : x.status, stdout : x.stdout.toString()});
 	} else {
 		var e = _g.error;
-		return tink_core_Outcome.Failure(new tink_core_TypedError(null,"Failed to call " + cmd + " because " + Std.string(e),{ fileName : "Git.hx", lineNumber : 25, className : "lix.client.sources.Git", methodName : "eval"}));
+		return tink_core_Outcome.Failure(new tink_core_TypedError(null,"Failed to call " + cmd + " because " + Std.string(e),{ fileName : "Git.hx", lineNumber : 27, className : "lix.client.sources.Git", methodName : "eval"}));
 	}
 };
 lix_client_sources_Git.cli = function(cwd) {
@@ -26206,7 +26505,7 @@ lix_client_sources_Git.cli = function(cwd) {
 			if(code == 0) {
 				return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Success(tink_core_Noise.Noise));
 			} else {
-				return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(code,"git " + args[0] + " failed",{ fileName : "Git.hx", lineNumber : 33, className : "lix.client.sources.Git", methodName : "cli"})));
+				return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(code,"git " + args[0] + " failed",{ fileName : "Git.hx", lineNumber : 35, className : "lix.client.sources.Git", methodName : "cli"})));
 			}
 		});
 	}, 'eval' : function(args1) {
@@ -26214,7 +26513,7 @@ lix_client_sources_Git.cli = function(cwd) {
 			if(o.status == 0) {
 				return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Success(o.stdout.toString()));
 			} else {
-				return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(o.status,"git " + args1[0] + " failed",{ fileName : "Git.hx", lineNumber : 40, className : "lix.client.sources.Git", methodName : "cli"})));
+				return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(o.status,"git " + args1[0] + " failed",{ fileName : "Git.hx", lineNumber : 42, className : "lix.client.sources.Git", methodName : "cli"})));
 			}
 		});
 	}};
@@ -26269,35 +26568,42 @@ lix_client_sources_Git.prototype = {
 				var sha = version.length != 40 ? tink_core__$Promise_Promise_$Impl_$.next(git["eval"](["ls-remote",tink__$Url_Url_$Impl_$.toString(origin),version]),function(s) {
 					var _g11 = StringTools.trim(s);
 					if(_g11 == "") {
-						return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"Cannot resolve version " + version,{ fileName : "Git.hx", lineNumber : 73, className : "lix.client.sources.Git", methodName : "processUrl"})));
+						return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Failure(new tink_core_TypedError(null,"Cannot resolve version " + version,{ fileName : "Git.hx", lineNumber : 75, className : "lix.client.sources.Git", methodName : "processUrl"})));
 					} else {
 						var v5 = _g11;
 						return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Success(HxOverrides.substr(v5,0,40)));
 					}
 				}) : tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Success(version));
 				return tink_core__$Promise_Promise_$Impl_$.next(sha,tink_core__$Promise_Next_$Impl_$.ofSafeSync(function(sha1) {
-					var tmp4 = tink__$Url_Url_$Impl_$.fromString(raw.scheme + ":" + tink__$Url_Url_$Impl_$.toString(tink__$Url_Url_$Impl_$.resolve(url,tink__$Url_Url_$Impl_$.fromString("#" + sha1))));
-					var tmp5 = lix_client_ArchiveDestination.Computed(function(l) {
+					var tmp4 = _gthis.submodules ? ["--submodules"] : [];
+					var tmp5 = tink__$Url_Url_$Impl_$.fromString(raw.scheme + ":" + tink__$Url_Url_$Impl_$.toString(tink__$Url_Url_$Impl_$.resolve(url,tink__$Url_Url_$Impl_$.fromString("#" + sha1))));
+					var tmp6 = lix_client_ArchiveDestination.Computed(function(l) {
 						return [l.name,l.version,"git",sha1];
 					});
-					var tmp6 = new lix_client_LibVersion(haxe_ds_Option.None,haxe_ds_Option.None);
-					var tmp7 = lix_client_ArchiveKind.Custom(function(ctx) {
+					var tmp7 = new lix_client_LibVersion(haxe_ds_Option.None,haxe_ds_Option.None);
+					var tmp8 = lix_client_ArchiveKind.Custom(function(ctx) {
 						var repo = haxe_io_Path.join([_gthis.scope.libCache,".gitrepos",lix_client_DownloadedArchive.escape(tink__$Url_Url_$Impl_$.toString(origin))]);
 						var git1 = lix_client_sources_Git.cli(repo);
 						var git2 = git1;
-						var tmp8 = sys_FileSystem.exists("" + repo + "/.git") ? ["fetch",tink__$Url_Url_$Impl_$.toString(origin)] : ["clone",tink__$Url_Url_$Impl_$.toString(origin),"."];
-						return tink_core__$Promise_Promise_$Impl_$.next(tink_core__$Promise_Promise_$Impl_$.next(tink_core__$Promise_Promise_$Impl_$.next(git2.call(tmp8),function(_) {
+						var tmp9 = sys_FileSystem.exists("" + repo + "/.git") ? ["fetch",tink__$Url_Url_$Impl_$.toString(origin)] : ["clone",tink__$Url_Url_$Impl_$.toString(origin),"."];
+						return tink_core__$Promise_Promise_$Impl_$.next(tink_core__$Promise_Promise_$Impl_$.next(tink_core__$Promise_Promise_$Impl_$.next(tink_core__$Promise_Promise_$Impl_$.next(git2.call(tmp9),function(_) {
 							return git1.call(["checkout",sha1]);
 						}),function(_1) {
+							if(_gthis.submodules) {
+								return git1.call(["submodule","update","--init","--recursive"]);
+							} else {
+								return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Success(tink_core_Noise.Noise));
+							}
+						}),function(_2) {
 							haxeshim_Fs.copy(repo,ctx.dest,function(name) {
 								return name != "" + repo + "/.git";
 							});
 							return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Success(tink_core_Noise.Noise));
-						}),function(_2) {
+						}),function(_3) {
 							return tink_core__$Promise_Promise_$Impl_$.ofOutcome(tink_core_Outcome.Success(ctx.dest));
 						});
 					});
-					return { url : raw, normalized : tmp4, dest : tmp5, lib : tmp6, kind : tmp7};
+					return { url : raw, 'arguments' : tmp4, normalized : tmp5, dest : tmp6, lib : tmp7, kind : tmp8};
 				}));
 			}
 		}
@@ -34797,300 +35103,6 @@ tink_semver_Parser.DOT = tink_parse__$StringSlice_StringSlice_$Impl_$.ofString("
 tink_semver_Parser.HYPHEN = tink_parse__$StringSlice_StringSlice_$Impl_$.ofString("-");
 lix_cli_Cli.main();
 })(typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
-
-},
-"cNkGJh84Pf7HRvooiXjtuVllNMQOY39llomxXEm6JyE=":
-function (require, module, exports, __dirname, __filename) {
-'use strict';
-
-exports.__esModule = true;
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-/*!
- * Amazon Cognito Auth SDK for JavaScript
- * Copyright 2017 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *         http://aws.amazon.com/apache2.0/
- *
- * or in the "license" file accompanying this file.
- * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
- * OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions
- * and limitations under the License.
- */
-var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-var weekNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-/** @class */
-
-var DateHelper = function () {
-  function DateHelper() {
-    _classCallCheck(this, DateHelper);
-  }
-
-  /**
-   * @returns {string} The current time in "ddd MMM D HH:mm:ss UTC YYYY" format.
-   */
-  DateHelper.prototype.getNowString = function getNowString() {
-    var now = new Date();
-
-    var weekDay = weekNames[now.getUTCDay()];
-    var month = monthNames[now.getUTCMonth()];
-    var day = now.getUTCDate();
-
-    var hours = now.getUTCHours();
-    if (hours < 10) {
-      hours = '0' + hours;
-    }
-
-    var minutes = now.getUTCMinutes();
-    if (minutes < 10) {
-      minutes = '0' + minutes;
-    }
-
-    var seconds = now.getUTCSeconds();
-    if (seconds < 10) {
-      seconds = '0' + seconds;
-    }
-
-    var year = now.getUTCFullYear();
-
-    // ddd MMM D HH:mm:ss UTC YYYY
-    var dateNow = weekDay + ' ' + month + ' ' + day + ' ' + hours + ':' + minutes + ':' + seconds + ' UTC ' + year;
-
-    return dateNow;
-  };
-
-  return DateHelper;
-}();
-
-exports.default = DateHelper;
-},
-"cvqfYP9IEpFD3i4cH2JM7w1/Qa1Vx9YNlNEBRjUplgc=":
-function (require, module, exports, __dirname, __filename) {
-'use strict';
-
-/*<replacement>*/
-
-var pna = require('process-nextick-args');
-/*</replacement>*/
-
-// undocumented cb() API, needed for core, not for public API
-function destroy(err, cb) {
-  var _this = this;
-
-  var readableDestroyed = this._readableState && this._readableState.destroyed;
-  var writableDestroyed = this._writableState && this._writableState.destroyed;
-
-  if (readableDestroyed || writableDestroyed) {
-    if (cb) {
-      cb(err);
-    } else if (err && (!this._writableState || !this._writableState.errorEmitted)) {
-      pna.nextTick(emitErrorNT, this, err);
-    }
-    return this;
-  }
-
-  // we set destroyed to true before firing error callbacks in order
-  // to make it re-entrance safe in case destroy() is called within callbacks
-
-  if (this._readableState) {
-    this._readableState.destroyed = true;
-  }
-
-  // if this is a duplex stream mark the writable part as destroyed as well
-  if (this._writableState) {
-    this._writableState.destroyed = true;
-  }
-
-  this._destroy(err || null, function (err) {
-    if (!cb && err) {
-      pna.nextTick(emitErrorNT, _this, err);
-      if (_this._writableState) {
-        _this._writableState.errorEmitted = true;
-      }
-    } else if (cb) {
-      cb(err);
-    }
-  });
-
-  return this;
-}
-
-function undestroy() {
-  if (this._readableState) {
-    this._readableState.destroyed = false;
-    this._readableState.reading = false;
-    this._readableState.ended = false;
-    this._readableState.endEmitted = false;
-  }
-
-  if (this._writableState) {
-    this._writableState.destroyed = false;
-    this._writableState.ended = false;
-    this._writableState.ending = false;
-    this._writableState.finished = false;
-    this._writableState.errorEmitted = false;
-  }
-}
-
-function emitErrorNT(self, err) {
-  self.emit('error', err);
-}
-
-module.exports = {
-  destroy: destroy,
-  undestroy: undestroy
-};
-},
-"dNeqGTE1JA/3tgRnnlYKLiNutQ/9L4hXxhdAxQfx1Zg=":
-function (require, module, exports, __dirname, __filename) {
-/**
- * node-crc32-stream
- *
- * Copyright (c) 2014 Chris Talkington, contributors.
- * Licensed under the MIT license.
- * https://github.com/archiverjs/node-crc32-stream/blob/master/LICENSE-MIT
- */
-var inherits = require('util').inherits;
-var Transform = require('readable-stream').Transform;
-
-var crc32 = require('crc').crc32;
-
-var CRC32Stream = module.exports = function CRC32Stream(options) {
-  Transform.call(this, options);
-  this.checksum = new Buffer(4);
-  this.checksum.writeInt32BE(0, 0);
-
-  this.rawSize = 0;
-};
-
-inherits(CRC32Stream, Transform);
-
-CRC32Stream.prototype._transform = function(chunk, encoding, callback) {
-  if (chunk) {
-    this.checksum = crc32(chunk, this.checksum);
-    this.rawSize += chunk.length;
-  }
-
-  callback(null, chunk);
-};
-
-CRC32Stream.prototype.digest = function(encoding) {
-  var checksum = new Buffer(4);
-  checksum.writeUInt32BE(this.checksum >>> 0, 0);
-  return encoding ? checksum.toString(encoding) : checksum;
-};
-
-CRC32Stream.prototype.hex = function() {
-  return this.digest('hex').toUpperCase();
-};
-
-CRC32Stream.prototype.size = function() {
-  return this.rawSize;
-};
-
-},
-"e36wfZMPaqwyun9WE5cVLJe4GzUQ1d7tAd5xIyep4Xo=":
-function (require, module, exports, __dirname, __filename) {
-'use strict';
-
-if (!process.version ||
-    process.version.indexOf('v0.') === 0 ||
-    process.version.indexOf('v1.') === 0 && process.version.indexOf('v1.8.') !== 0) {
-  module.exports = { nextTick: nextTick };
-} else {
-  module.exports = process
-}
-
-function nextTick(fn, arg1, arg2, arg3) {
-  if (typeof fn !== 'function') {
-    throw new TypeError('"callback" argument must be a function');
-  }
-  var len = arguments.length;
-  var args, i;
-  switch (len) {
-  case 0:
-  case 1:
-    return process.nextTick(fn);
-  case 2:
-    return process.nextTick(function afterTickOne() {
-      fn.call(null, arg1);
-    });
-  case 3:
-    return process.nextTick(function afterTickTwo() {
-      fn.call(null, arg1, arg2);
-    });
-  case 4:
-    return process.nextTick(function afterTickThree() {
-      fn.call(null, arg1, arg2, arg3);
-    });
-  default:
-    args = new Array(len - 1);
-    i = 0;
-    while (i < args.length) {
-      args[i++] = arguments[i];
-    }
-    return process.nextTick(function afterTick() {
-      fn.apply(null, args);
-    });
-  }
-}
-
-
-},
-"evml92wA9yvtRLg4JKis1n/rz9PTT9KTwgw1qn5mV/Y=":
-function (require, module, exports, __dirname, __filename) {
-try {
-  var util = require('util');
-  if (typeof util.inherits !== 'function') throw '';
-  module.exports = util.inherits;
-} catch (e) {
-  module.exports = require('./inherits_browser.js');
-}
-
-},
-"fcYRrxhcnv70k8xFFaisyZ/4TgeN/YfBjZw+NqpOkxI=":
-function (require, module, exports, __dirname, __filename) {
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _buffer = require('buffer');
-
-var _create_buffer = require('./create_buffer');
-
-var _create_buffer2 = _interopRequireDefault(_create_buffer);
-
-var _define_crc = require('./define_crc');
-
-var _define_crc2 = _interopRequireDefault(_define_crc);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var crc1 = (0, _define_crc2.default)('crc1', function (buf, previous) {
-  if (!_buffer.Buffer.isBuffer(buf)) buf = (0, _create_buffer2.default)(buf);
-
-  var crc = ~~previous;
-  var accum = 0;
-
-  for (var index = 0; index < buf.length; index++) {
-    var byte = buf[index];
-    accum += byte;
-  }
-
-  crc += accum % 256;
-  return crc % 256;
-});
-
-exports.default = crc1;
 
 },
 "g0mUi5piCi77VcuTC7v9tEpdl1Y57TfQq4Ie/61Nw14=":
@@ -46118,7 +46130,7 @@ exports.default = CognitoAccessToken;
 ,
 {
   "bin/lix.js": [
-    "bqHxAxlm2B8uV+DljzxOzmCTO1w6BYx1Ni9/QrdEepY=",
+    "fqUiydJrKjW6UCLn7/dhNGo/7tM6Z2hatJSJl6eWau0=",
     {
       "amazon-cognito-auth-js": "node_modules/amazon-cognito-auth-js/lib/index.js",
       "archiver": "node_modules/archiver/index.js",
