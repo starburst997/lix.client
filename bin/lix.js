@@ -26585,7 +26585,7 @@ lix_client_sources_Git.prototype = {
 						var repo = haxe_io_Path.join([_gthis.scope.libCache,".gitrepos",lix_client_DownloadedArchive.escape(tink__$Url_Url_$Impl_$.toString(origin))]);
 						var git1 = lix_client_sources_Git.cli(repo);
 						var git2 = git1;
-						var tmp9 = sys_FileSystem.exists("" + repo + "/.git") ? ["fetch",tink__$Url_Url_$Impl_$.toString(origin)] : ["clone",tink__$Url_Url_$Impl_$.toString(origin),"."];
+						var tmp9 = sys_FileSystem.exists("" + repo + "/.git") ? ["fetch", "origin"] : ["clone",tink__$Url_Url_$Impl_$.toString(origin),"."];
 						return tink_core__$Promise_Promise_$Impl_$.next(tink_core__$Promise_Promise_$Impl_$.next(tink_core__$Promise_Promise_$Impl_$.next(tink_core__$Promise_Promise_$Impl_$.next(git2.call(tmp9),function(_) {
 							return git1.call(["checkout",sha1]);
 						}),function(_1) {
